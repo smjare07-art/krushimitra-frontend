@@ -1,0 +1,78 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.home {
+  height: 100%;
+  width: 100%;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-image: url("/images/farmer-bg.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* DARK OVERLAY */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* CONTENT */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  padding-left: 70px;
+}
+
+.title {
+  font-size: 80px;
+  font-weight: 700;
+  text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.6);
+}
+
+.btn-group {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* BUTTONS */
+.btn {
+  padding: 15px 40px;
+  width: fit-content;
+  background: #f7c428;
+  color: black;
+  font-size: 25px;
+  font-weight: 600;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.4);
+  transition: 0.2s;
+}
+
+.btn:hover {
+  transform: scale(1.07);
+}
