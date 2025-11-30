@@ -1,30 +1,57 @@
 import React, { useState } from "react";
 import "./FarmerLogin.css";
 import { Link, useNavigate } from "react-router-dom";
+import { db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function FarmerLogin() {
   const navigate = useNavigate();
 
   const [aadhar, setAadhar] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin(e) {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // FRONTEND VALIDATION
     if (aadhar.length !== 12) {
-      alert("कृपया योग्य १२ अंकी आधार क्रमांक टाका");
+      alert("कृपया योग्य 12 अंकी आधार क्रमांक टाका");
       return;
     }
-
     if (!password) {
       alert("कृपया पासवर्ड टाका");
       return;
     }
 
-    // LOGIN SUCCESS → Redirect to Dashboard
-    navigate("/farmer/dashboard");
-  }
+    try {
+      setLoading(true);
+
+      const ref = doc(db, "farmers", aadhar);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        alert("हा आधार नोंदणीकृत नाही");
+        return;
+      }
+
+      const data = snap.data();
+
+      if (data.password !== password) {
+        alert("चुकीचा पासवर्ड!");
+        return;
+      }
+
+      localStorage.setItem("farmer", JSON.stringify(data));
+
+      alert("लॉगिन यशस्वी!");
+      navigate("/farmer/dashboard");
+
+    } catch (err) {
+      alert("Login Error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -32,13 +59,11 @@ export default function FarmerLogin() {
         <h2 className="login-title">शेतकरी लॉगिन</h2>
 
         <form className="login-form" onSubmit={handleLogin}>
-
           <label className="login-label">
             आधार क्रमांक *
             <input
               type="text"
               className="login-input"
-              placeholder="१२ अंकी आधार क्रमांक टाका"
               maxLength="12"
               required
               value={aadhar}
@@ -51,15 +76,14 @@ export default function FarmerLogin() {
             <input
               type="password"
               className="login-input"
-              placeholder="आपला पासवर्ड टाका"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
 
-          <button type="submit" className="login-btn">
-            लॉगिन करा
+          <button className="login-btn">
+            {loading ? "कृपया थांबा..." : "लॉगिन करा"}
           </button>
 
           <p className="login-text">
@@ -68,7 +92,6 @@ export default function FarmerLogin() {
               नोंदणी करा
             </Link>
           </p>
-
         </form>
       </div>
     </div>

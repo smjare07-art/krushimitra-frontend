@@ -1,54 +1,102 @@
 import React, { useState, useRef } from "react";
 import "./FarmerRegister.css";
 
+import { db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
+
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useNavigate } from "react-router-dom";
+
 export default function FarmerRegister() {
+  const navigate = useNavigate();
+  const storage = getStorage();
 
-  const tabs = [
-    { label: "मूळ माहिती", id: "basic" },
-    { label: "पत्त्याची माहिती", id: "address" },
-    { label: "शेती माहिती", id: "farm" },
-    { label: "बँक माहिती", id: "bank" },
-    { label: "कागदपत्रे", id: "docs" },
-    { label: "अनुभव", id: "exp" },
-    { label: "लॉजिस्टिक्स", id: "logi" },
-    { label: "सूचना", id: "notify" }
-  ];
-
-  const [activeTab, setActiveTab] = useState(0);
-
-  //  SECTION SCROLL HANDLING
-  const sectionRefs = {
-    basic: useRef(null),
-    address: useRef(null),
-    farm: useRef(null),
-    bank: useRef(null),
-    docs: useRef(null),
-    exp: useRef(null),
-    logi: useRef(null),
-    notify: useRef(null),
-  };
-
-  const scrollToSection = (id, index) => {
-    setActiveTab(index);
-    sectionRefs[id].current.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
-
-  // ============================
-  // FORM + OTP STATE
-  // ============================
+  // ======================================================
+  // FORM STATE
+  // ======================================================
   const [form, setForm] = useState({
+    fullName: "",
     aadhar: "",
     mobile: "",
     email: "",
+
+    state: "",
+    district: "",
+    taluka: "",
+    village: "",
+    pincode: "",
+    fullAddress: "",
+
+    landArea: "",
+    landType: "",
+    crops: "",
+    currentCrops: "",
+    upcomingCrops: "",
+
+    bankAccount: "",
+    ifsc: "",
+    bankName: "",
+    branch: "",
+    upi: "",
+
+    pan: "",
+    photo: null,
+
+    expYears: "",
+    expertise: "",
+    organicInfo: "",
+
+    hasVehicle: "",
+    canDeliver: "",
+    needTransport: "",
+
+    sms: false,
+    price: false,
+    weather: false,
+    offers: false,
   });
+
+  const update = (f, v) => setForm({ ...form, [f]: v });
+
+  // ======================================================
+  // PASSWORD
+  // ======================================================
+  const [passwords, setPasswords] = useState({
+    pass: "",
+    confirm: "",
+  });
+  const [passError, setPassError] = useState("");
+
+  const updatePassword = (f, v) => {
+    const d = { ...passwords, [f]: v };
+    setPasswords(d);
+
+    if (d.pass !== d.confirm) setPassError("Passwords do not match");
+    else setPassError("");
+  };
+
+  // ======================================================
+  // PHOTO UPLOAD PREVIEW
+  // ======================================================
+  const [photoPreview, setPhotoPreview] = useState(null);
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    setForm({ ...form, photo: file });
+
+    if (file) setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  // ======================================================
+  // OTP SYSTEM
+  // ======================================================
+  const generateOtp = () =>
+    Math.floor(100000 + Math.random() * 900000);
 
   const [otp, setOtp] = useState({
     aadhar: "",
     mobile: "",
-    email: ""
+    email: "",
   });
 
   const [otpStatus, setOtpStatus] = useState({
@@ -57,367 +105,280 @@ export default function FarmerRegister() {
     mobileSent: false,
     mobileVerified: false,
     emailSent: false,
-    emailVerified: false
+    emailVerified: false,
   });
 
-  // GENERATE OTP
-  const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
-
-  // SEND + VERIFY OTP
-  const sendAadharOtp = () => {
-    alert("आपला आधार OTP: " + generateOtp());
-    setOtpStatus({ ...otpStatus, aadharSent: true });
+  const sendOtp = (type) => {
+    alert("तुमचा OTP: " + generateOtp());
+    setOtpStatus((o) => ({ ...o, [type + "Sent"]: true }));
   };
 
-  const verifyAadharOtp = () => {
-    if (otp.aadhar.length === 6) {
-      setOtpStatus({ ...otpStatus, aadharVerified: true });
-      alert("आधार पडताळणी यशस्वी!");
-    } else alert("चुकीचा OTP!");
+  const verifyOtp = (type) => {
+    if (otp[type].length === 6) {
+      setOtpStatus((o) => ({ ...o, [type + "Verified"]: true }));
+      alert(type.toUpperCase() + " पडताळणी यशस्वी!");
+    } else {
+      alert("Wrong OTP!");
+    }
   };
 
-  const sendMobileOtp = () => {
-    alert("आपला मोबाईल OTP: " + generateOtp());
-    setOtpStatus({ ...otpStatus, mobileSent: true });
+  // ======================================================
+  // SAVE FORM
+  // ======================================================
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    if (passwords.pass !== passwords.confirm) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    if (
+      !otpStatus.aadharVerified ||
+      !otpStatus.mobileVerified ||
+      !otpStatus.emailVerified
+    ) {
+      alert("कृपया सर्व OTP पडताळा!");
+      return;
+    }
+
+    try {
+      let photoURL = "";
+
+      // ------------------------------
+      // UPLOAD PHOTO TO FIREBASE STORAGE
+      // ------------------------------
+      if (form.photo) {
+        const fileRef = ref(storage, `farmer_photos/${form.aadhar}.jpg`);
+        await uploadBytes(fileRef, form.photo);
+        photoURL = await getDownloadURL(fileRef);
+      }
+
+      // ------------------------------
+      // SAVE DATA TO FIRESTORE
+      // ------------------------------
+      await setDoc(doc(db, "farmers", form.aadhar), {
+        ...form,
+        photo: photoURL,
+        password: passwords.pass,
+      });
+
+      alert("नोंदणी पूर्ण!");
+      navigate("/farmer/login");
+    } catch (err) {
+      alert("ERROR: " + err.message);
+    }
   };
 
-  const verifyMobileOtp = () => {
-    if (otp.mobile.length === 6) {
-      setOtpStatus({ ...otpStatus, mobileVerified: true });
-      alert("मोबाईल पडताळणी यशस्वी!");
-    } else alert("OTP चुकीचा!");
+  // ======================================================
+  // UI SECTIONS + SCROLL
+  // ======================================================
+  const tabs = [
+    { label: "मूळ माहिती", id: "basic" },
+    { label: "पत्ता", id: "address" },
+    { label: "शेती", id: "farm" },
+    { label: "बँक", id: "bank" },
+    { label: "सुरक्षा", id: "security" },
+    { label: "कागदपत्रे", id: "docs" },
+    { label: "अनुभव", id: "exp" },
+    { label: "लॉजिस्टिक्स", id: "logi" },
+    { label: "सूचना", id: "notify" },
+  ];
+
+  const [activeTab, setActiveTab] = useState(0);
+  const refs = {
+    basic: useRef(null),
+    address: useRef(null),
+    farm: useRef(null),
+    bank: useRef(null),
+    security: useRef(null),
+    docs: useRef(null),
+    exp: useRef(null),
+    logi: useRef(null),
+    notify: useRef(null),
   };
 
-  const sendEmailOtp = () => {
-    alert("आपला ईमेल OTP: " + generateOtp());
-    setOtpStatus({ ...otpStatus, emailSent: true });
+  const scrollTo = (id, i) => {
+    setActiveTab(i);
+    refs[id].current.scrollIntoView({ behavior: "smooth" });
   };
 
-  const verifyEmailOtp = () => {
-    if (otp.email.length === 6) {
-      setOtpStatus({ ...otpStatus, emailVerified: true });
-      alert("ईमेल पडताळणी यशस्वी!");
-    } else alert("OTP चुकीचा!");
-  };
-
+  // ======================================================
+  // UI
+  // ======================================================
   return (
     <div className="fr-page">
       <div className="fr-card">
-        <h1 className="main-title">🧑‍🌾 शेतकरी नोंदणी फॉर्म</h1>
+        <h1 className="main-title">🧑‍🌾 शेतकरी नोंदणी</h1>
 
-        {/* ------------------- TABS -------------------- */}
+        {/* TABS */}
         <div className="fr-tabs">
-          {tabs.map((tab, index) => (
+          {tabs.map((t, i) => (
             <div
-              key={index}
-              className={`fr-tab ${activeTab === index ? "active" : ""}`}
-              onClick={() => scrollToSection(tab.id, index)}
+              key={i}
+              className={`fr-tab ${activeTab === i ? "active" : ""}`}
+              onClick={() => scrollTo(t.id, i)}
             >
-              {tab.label}
+              {t.label}
             </div>
           ))}
         </div>
 
-        {/* ------------------- START FORM -------------------- */}
-        <div className="fr-form">
+        {/* FORM */}
+        <form className="fr-form" onSubmit={handleRegister}>
 
-          {/* 1️⃣ BASIC INFO */}
-          <h2 ref={sectionRefs.basic} className="section-title">1️⃣ मूळ माहिती</h2>
+          {/* BASIC */}
+          <h2 ref={refs.basic} className="section-title">1️⃣ मूळ माहिती</h2>
 
           <label>पूर्ण नाव *
-            <input className="fr-input" required />
+            <input className="fr-input" required onChange={(e) => update("fullName", e.target.value)} />
           </label>
 
-          {/* AADHAR + OTP */}
-          <label>आधार क्रमांक *
-            <input
-              className="fr-input"
-              required
-              maxLength="12"
-              onChange={(e) =>
-                setForm({ ...form, aadhar: e.target.value })
-              }
-            />
+          <label>आधार *
+            <input className="fr-input" maxLength="12" required onChange={(e) => update("aadhar", e.target.value)} />
           </label>
 
           {form.aadhar.length === 12 && !otpStatus.aadharVerified && (
-            <button className="otp-btn" type="button" onClick={sendAadharOtp}>
-              Send OTP
-            </button>
+            <button type="button" className="otp-btn" onClick={() => sendOtp("aadhar")}>Send OTP</button>
           )}
 
           {otpStatus.aadharSent && !otpStatus.aadharVerified && (
             <>
-              <input
-                className="fr-input"
-                placeholder="OTP"
-                maxLength="6"
-                onChange={(e) =>
-                  setOtp({ ...otp, aadhar: e.target.value })
-                }
-              />
-              <button className="verify-btn" type="button" onClick={verifyAadharOtp}>
-                Verify OTP
-              </button>
+              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, aadhar: e.target.value })} />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("aadhar")}>Verify</button>
             </>
           )}
 
           {otpStatus.aadharVerified && <p className="verified">✔ आधार पडताळला</p>}
 
-          {/* MOBILE + OTP */}
-          <label>मोबाईल नंबर *
-            <input
-              className="fr-input"
-              required
-              maxLength="10"
-              onChange={(e) =>
-                setForm({ ...form, mobile: e.target.value })
-              }
-            />
+          <label>मोबाईल *
+            <input className="fr-input" maxLength="10" required onChange={(e) => update("mobile", e.target.value)} />
           </label>
 
           {form.mobile.length === 10 && !otpStatus.mobileVerified && (
-            <button className="otp-btn" type="button" onClick={sendMobileOtp}>
-              Send OTP
-            </button>
+            <button type="button" className="otp-btn" onClick={() => sendOtp("mobile")}>Send OTP</button>
           )}
 
           {otpStatus.mobileSent && !otpStatus.mobileVerified && (
             <>
-              <input
-                className="fr-input"
-                placeholder="OTP"
-                maxLength="6"
-                onChange={(e) =>
-                  setOtp({ ...otp, mobile: e.target.value })
-                }
-              />
-              <button className="verify-btn" type="button" onClick={verifyMobileOtp}>
-                Verify OTP
-              </button>
+              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, mobile: e.target.value })} />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("mobile")}>Verify</button>
             </>
           )}
 
           {otpStatus.mobileVerified && <p className="verified">✔ मोबाईल पडताळला</p>}
 
-          {/* EMAIL + OTP */}
           <label>ईमेल *
-            <input
-              className="fr-input"
-              type="email"
-              required
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
-            />
+            <input className="fr-input" type="email" required onChange={(e) => update("email", e.target.value)} />
           </label>
 
           {form.email.includes("@") && !otpStatus.emailVerified && (
-            <button className="otp-btn" type="button" onClick={sendEmailOtp}>
-              Send OTP
-            </button>
+            <button type="button" className="otp-btn" onClick={() => sendOtp("email")}>Send OTP</button>
           )}
 
           {otpStatus.emailSent && !otpStatus.emailVerified && (
             <>
-              <input
-                className="fr-input"
-                placeholder="OTP"
-                maxLength="6"
-                onChange={(e) =>
-                  setOtp({ ...otp, email: e.target.value })
-                }
-              />
-              <button className="verify-btn" type="button" onClick={verifyEmailOtp}>
-                Verify OTP
-              </button>
+              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, email: e.target.value })} />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("email")}>Verify</button>
             </>
           )}
 
           {otpStatus.emailVerified && <p className="verified">✔ ईमेल पडताळला</p>}
 
-          {/* -------------------------------------------------
-   2️⃣ ADDRESS DETAILS (Required)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.address} className="section-title">2️⃣ पत्त्याची माहिती</h2>
+          {/* ADDRESS */}
+          <h2 ref={refs.address} className="section-title">2️⃣ पत्ता</h2>
+          <label>राज्य<input className="fr-input" required onChange={(e) => update("state", e.target.value)} /></label>
+          <label>जिल्हा<input className="fr-input" required onChange={(e) => update("district", e.target.value)} /></label>
+          <label>तालुका<input className="fr-input" required onChange={(e) => update("taluka", e.target.value)} /></label>
+          <label>गाव<input className="fr-input" required onChange={(e) => update("village", e.target.value)} /></label>
+          <label>पिनकोड<input className="fr-input" maxLength="6" required onChange={(e) => update("pincode", e.target.value)} /></label>
+          <label>पूर्ण पत्ता<textarea className="fr-textarea" required onChange={(e) => update("fullAddress", e.target.value)}></textarea></label>
 
-<label>राज्य *
-  <input className="fr-input" required />
-</label>
+          {/* FARM */}
+          <h2 ref={refs.farm} className="section-title">3️⃣ शेती</h2>
 
-<label>जिल्हा *
-  <input className="fr-input" required />
-</label>
+          <label>जमिनीचे क्षेत्रफळ<input className="fr-input" required onChange={(e) => update("landArea", e.target.value)} /></label>
 
-<label>तालुका *
-  <input className="fr-input" required />
-</label>
+          <label>जमिनीचा प्रकार
+            <select className="fr-input" required onChange={(e) => update("landType", e.target.value)}>
+              <option value="">निवडा</option>
+              <option>जिरायती</option>
+              <option>सिंचित</option>
+              <option>बागायती</option>
+            </select>
+          </label>
 
-<label>गाव *
-  <input className="fr-input" required />
-</label>
+          <label>नेहमी पिके<input className="fr-input" required onChange={(e) => update("crops", e.target.value)} /></label>
+          <label>सध्याची पिके<input className="fr-input" required onChange={(e) => update("currentCrops", e.target.value)} /></label>
+          <label>भविष्यातील पिके<input className="fr-input" required onChange={(e) => update("upcomingCrops", e.target.value)} /></label>
 
-<label>पिनकोड *
-  <input className="fr-input" required maxLength="6" />
-</label>
+          {/* BANK */}
+          <h2 ref={refs.bank} className="section-title">4️⃣ बँक माहिती</h2>
 
-<label>पूर्ण पत्ता *
-  <textarea className="fr-textarea" required></textarea>
-</label>
+          <label>बँक खाते<input className="fr-input" required onChange={(e) => update("bankAccount", e.target.value)} /></label>
+          <label>IFSC<input className="fr-input" required onChange={(e) => update("ifsc", e.target.value)} /></label>
+          <label>बँक नाव<input className="fr-input" required onChange={(e) => update("bankName", e.target.value)} /></label>
+          <label>शाखा<input className="fr-input" required onChange={(e) => update("branch", e.target.value)} /></label>
+          <label>UPI<input className="fr-input" onChange={(e) => update("upi", e.target.value)} /></label>
 
+          {/* SECURITY */}
+          <h2 ref={refs.security} className="section-title">5️⃣ सुरक्षा (Password + Photo)</h2>
 
-{/* -------------------------------------------------
-   3️⃣ FARM DETAILS (Required)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.farm} className="section-title">3️⃣ शेतीची माहिती</h2>
+          <label>पासवर्ड *
+            <input className="fr-input" type="password" required onChange={(e) => updatePassword("pass", e.target.value)} />
+          </label>
 
-<label>जमिनीचे क्षेत्रफळ (एकर/हेक्टर) *
-  <input className="fr-input" required />
-</label>
+          <label>पासवर्ड पुन्हा टाका *
+            <input className="fr-input" type="password" required onChange={(e) => updatePassword("confirm", e.target.value)} />
+          </label>
 
-<label>जमिनीचा प्रकार *
-  <select className="fr-input" required>
-    <option value="">निवडा</option>
-    <option>जिरायती</option>
-    <option>सिंचित</option>
-    <option>बागायती</option>
-  </select>
-</label>
+          {passError && <p style={{ color: "red" }}>{passError}</p>}
 
-<label>नेहमी घेतली जाणारी पिके *
-  <input className="fr-input" required placeholder="उदा. सोयाबीन, ऊस, गहू" />
-</label>
+          <h3>🖼 प्रोफाइल फोटो अपलोड करा</h3>
+          <input type="file" accept="image/*" onChange={handleImage} />
 
-<label>सध्याची उपलब्ध पिके *
-  <input className="fr-input" required />
-</label>
+          {photoPreview && (
+            <img
+              src={photoPreview}
+              style={{
+                width: "150px",
+                marginTop: "10px",
+                borderRadius: "10px",
+                border: "2px solid #ccc"
+              }}
+            />
+          )}
 
-<label>भविष्यातील पिके (Upcoming) *
-  <input className="fr-input" required />
-</label>
+          {/* DOCS */}
+          <h2 ref={refs.docs} className="section-title">6️⃣ कागदपत्रे</h2>
+          <label>PAN<input className="fr-input" required onChange={(e) => update("pan", e.target.value)} /></label>
 
+          {/* EXPERIENCE */}
+          <h2 ref={refs.exp} className="section-title">7️⃣ अनुभव</h2>
+          <label>अनुभव (वर्षे)<input className="fr-input" type="number" onChange={(e) => update("expYears", e.target.value)} /></label>
+          <label>तज्ञ पिके<input className="fr-input" onChange={(e) => update("expertise", e.target.value)} /></label>
+          <label>Organic माहिती<input className="fr-input" onChange={(e) => update("organicInfo", e.target.value)} /></label>
 
-{/* -------------------------------------------------
-   4️⃣ BANK DETAILS (Required)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.bank} className="section-title">4️⃣ बँक माहिती</h2>
+          {/* LOGISTICS */}
+          <h2 ref={refs.logi} className="section-title">8️⃣ लॉजिस्टिक्स</h2>
+          <label>वाहन<select className="fr-input" onChange={(e) => update("hasVehicle", e.target.value)}>
+            <option>निवडा</option>
+            <option>होय</option>
+            <option>नाही</option>
+          </select></label>
 
-<label>बँक खाते क्रमांक *
-  <input className="fr-input" required />
-</label>
+          {/* NOTIFICATIONS */}
+          <h2 ref={refs.notify} className="section-title">9️⃣ सूचना</h2>
 
-<label>IFSC कोड *
-  <input className="fr-input" required />
-</label>
-
-<label>बँकेचे नाव *
-  <input className="fr-input" required />
-</label>
-
-<label>शाखा *
-  <input className="fr-input" required />
-</label>
-
-<label>UPI ID (ऐच्छिक)
-  <input className="fr-input" />
-</label>
-
-
-{/* -------------------------------------------------
-   5️⃣ DOCUMENTS (Required)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.docs} className="section-title">5️⃣ कागदपत्रे</h2>
-
-<label>आधार क्रमांक *
-  <input className="fr-input" required maxLength="12" />
-</label>
-
-<label>PAN क्रमांक *
-  <input className="fr-input" required />
-</label>
-
-<label>7/12 उतारा (Upload) *
-  <input type="file" className="fr-input" required />
-</label>
-
-<label>Passport-size फोटो (Upload) *
-  <input type="file" className="fr-input" required />
-</label>
-
-
-{/* -------------------------------------------------
-   6️⃣ EXPERIENCE (Optional but Visible)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.exp} className="section-title">6️⃣ शेतीचा अनुभव</h2>
-
-<label>शेतीचा अनुभव (वर्षे)
-  <input className="fr-input" type="number" />
-</label>
-
-<label>तज्ञता असलेली पिके
-  <input className="fr-input" />
-</label>
-
-<label>Organic / Non-Organic माहिती
-  <input className="fr-input" />
-</label>
-
-
-{/* -------------------------------------------------
-   7️⃣ LOGISTICS (Optional but Useful)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.logi} className="section-title">7️⃣ वाहतूक माहिती</h2>
-
-<label>स्वतःकडे वाहन उपलब्ध?
-  <select className="fr-input">
-    <option>निवडा</option>
-    <option>होय</option>
-    <option>नाही</option>
-  </select>
-</label>
-
-<label>स्वतः डिलिव्हरी करू शकता?
-  <select className="fr-input">
-    <option>निवडा</option>
-    <option>होय</option>
-    <option>नाही</option>
-  </select>
-</label>
-
-<label>Transport ची गरज आहे?
-  <select className="fr-input">
-    <option>निवडा</option>
-    <option>होय</option>
-    <option>नाही</option>
-  </select>
-</label>
-
-
-{/* -------------------------------------------------
-   8️⃣ NOTIFICATIONS (Optional)
---------------------------------------------------- */}
-<h2 ref={sectionRefs.notify} className="section-title">8️⃣ सूचना पर्याय</h2>
-
-<label className="checkbox">
-  <input type="checkbox" /> SMS अलर्ट
-</label>
-
-<label className="checkbox">
-  <input type="checkbox" /> बाजारभाव अलर्ट
-</label>
-
-<label className="checkbox">
-  <input type="checkbox" /> हवामान अलर्ट
-</label>
-
-<label className="checkbox">
-  <input type="checkbox" /> कंपनी ऑफर अलर्ट
-</label>
+          <label className="checkbox"><input type="checkbox" onChange={(e) => update("sms", e.target.checked)} /> SMS</label>
+          <label className="checkbox"><input type="checkbox" onChange={(e) => update("price", e.target.checked)} /> बाजारभाव</label>
+          <label className="checkbox"><input type="checkbox" onChange={(e) => update("weather", e.target.checked)} /> हवामान</label>
+          <label className="checkbox"><input type="checkbox" onChange={(e) => update("offers", e.target.checked)} /> ऑफर</label>
 
           <br /><br />
+          <button className="btn-save" type="submit">Save</button>
 
-          <button className="btn-save">Save</button>
-        </div>
+        </form>
       </div>
     </div>
   );

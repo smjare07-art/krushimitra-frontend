@@ -1,0 +1,35 @@
+.weather-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.weather-card h3 {
+  font-size: 20px;
+  margin: 0;
+  color: #2e7d32;
+}
+
+.temp {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 10px 0;
+  color: #1565c0;
+}
+
+.desc {
+  text-transform: capitalize;
+  font-size: 16px;
+  color: #444;
+}
+
+.w-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+}

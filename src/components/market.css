@@ -1,0 +1,71 @@
+.market-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.market-card h3 {
+  margin: 0 0 14px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;  /* green */
+  text-align: left;
+}
+
+.market-row {
+  background: #f7f7f7;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: 0.2s;
+}
+
+.market-row:hover {
+  background: #eafbea;
+  transform: translateY(-2px);
+}
+
+.crop-name {
+  color: #1565c0;
+  font-size: 16px;
+  font-weight: 700;
+  width: 35%;
+}
+
+.crop-price {
+  color: #1b5e20;
+  font-size: 17px;
+  font-weight: 800;
+  width: 25%;
+  text-align: center;
+}
+
+.market-place {
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  width: 30%;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .market-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .crop-name,
+  .crop-price,
+  .market-place {
+    width: 100%;
+  }
+}

@@ -83,3 +83,24 @@
   .search input{width:200px}
   .sidebar{display:none}
 }
+.farmer-top-box {
+  background: #ffffff;
+  padding: 18px;
+  margin: 0 22px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+.farmer-welcome {
+  margin: 0;
+  font-size: 24px;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.farmer-info {
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--muted);
+}

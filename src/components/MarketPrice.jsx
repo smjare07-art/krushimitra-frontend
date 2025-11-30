@@ -1,24 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import "./market.css";
 
-export default function MarketPrice({ lang }) {
-  const t = (mr, hi, en) => (lang === "mr" ? mr : lang === "hi" ? hi : en);
-  // dummy list
-  const prices = [
-    { crop: "गहू", price: "₹2,100/qtl" },
-    { crop: "सورياबीन", price: "₹3,500/qtl" },
-    { crop: "भात", price: "₹2,400/qtl" },
-  ];
+export default function MarketPrice() {
+  const [prices, setPrices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPrices();
+  }, []);
+
+  const fetchPrices = async () => {
+    try {
+      const url = "https://bharatmarketapi.onrender.com/api/prices/today";
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      setPrices(data);
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      alert("Market API Error!");
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div className="market-card">⏳ बाजारभाव मिळत आहेत...</div>;
 
   return (
-    <section className="card market">
-      <h3>{t("आजचे बाजारभाव","आज के बाजार भाव","Market Price Today")}</h3>
-      <ul>
-        {prices.map((p,i)=>(
-          <li key={i}><strong>{p.crop}</strong> <span className="muted">{p.price}</span></li>
-        ))}
-      </ul>
+    <div className="market-card">
+      <h3>📈 आजचे बाजारभाव</h3>
 
-      <div className="mini-chart muted">{t("7 दिवसांचा ट्रेंड (डमी)","7 दिन का ट्रेंड","7-day trend (dummy)")}</div>
-    </section>
+      {prices.map((item, i) => (
+        <div key={i} className="market-row">
+          <div className="crop-name">{item.crop}</div>
+          <div className="crop-price">₹{item.price}</div>
+          <div className="market-place">{item.market}</div>
+        </div>
+      ))}
+    </div>
   );
 }

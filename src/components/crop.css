@@ -1,0 +1,29 @@
+.crop-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+.crop-card h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.c-title {
+  font-weight: 700;
+  margin-top: 14px;
+  color: #1565c0;
+}
+
+.c-text {
+  margin: 6px 0;
+  background: #f4f4f4;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #444;
+  font-size: 14px;
+}
