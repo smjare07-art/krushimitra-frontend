@@ -1,120 +1,140 @@
-:root{
-  --primary: #FFB300;
-  --green: #0F5132;
-  --bg: #f5f8f6;
-  --card: #ffffff;
-  --muted: #6b6b6b;
-  --shadow: rgba(0,0,0,0.08);
+/* ==========================================
+   ROOT LAYOUT
+========================================== */
+.dash-root {
+  display: flex;
+  background: #f0f7f0;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
 }
 
-*{box-sizing:border-box;font-family: 'Poppins', sans-serif;}
-
-.dash-root{
-  display:flex;
-  min-height:100vh;
-  background:var(--bg);
+/* ==========================================
+   MAIN CONTENT AREA
+========================================== */
+.dash-main {
+  flex: 1;
+  padding: 20px;
+  margin-left: 240px; /* space for sidebar */
+  transition: 0.3s;
 }
 
-/* SIDEBAR */
-.sidebar{
-  width:220px;
-  background:linear-gradient(180deg,#eaf6ef,#e8f6ee);
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-  border-right:1px solid rgba(0,0,0,0.03);
-}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{font-size:26px;background:#fff;padding:8px;border-radius:8px}
-.brand-text{font-weight:800;color:var(--green)}
-
-.menu{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.menu-item{background:transparent;border:none;padding:12px 10px;border-radius:10px;text-align:left;cursor:pointer;font-weight:600;color:var(--green)}
-.menu-item:hover{background:#fff;box-shadow:0 6px 18px var(--shadow)}
-
-.sidebar-footer{margin-top:auto;color:var(--muted);font-size:12px}
-
-/* MAIN */
-.dash-main{flex:1;display:flex;flex-direction:column}
-.headerbar{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;border-bottom:1px solid rgba(0,0,0,0.05);background:#fff}
-.search input{padding:10px 14px;border-radius:12px;border:1px solid #e6e6e6;width:360px}
-.header-right{display:flex;align-items:center;gap:12px}
-.lang-select{padding:6px;border-radius:8px}
-
-/* CONTENT LAYOUT */
-.dash-content{display:flex;gap:22px;padding:22px}
-.dash-left{flex:2;display:flex;flex-direction:column;gap:18px}
-.dash-right{width:380px;display:flex;flex-direction:column;gap:18px}
-
-/* CARD */
-.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 20px var(--shadow);border:1px solid rgba(0,0,0,0.03)}
-.card h3{margin:0 0 10px;font-size:18px;color:var(--green)}
-.muted{color:var(--muted);font-size:13px}
-
-/* profile */
-.profile-top{display:flex;gap:12px;align-items:center}
-.pf-photo{width:64px;height:64px;border-radius:10px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-size:28px}
-.profile-grid{display:flex;gap:12px;margin-top:12px}
-.profile-grid > div{flex:1}
-
-/* market */
-.market ul{list-style:none;padding:0;margin:0}
-.market li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(0,0,0,0.04)}
-
-/* mycrops */
-.mycrops table{width:100%;border-collapse:collapse}
-.mycrops th{color:var(--muted);text-align:left;padding-bottom:8px}
-.mycrops td{padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.04)}
-
-/* offers */
-.offer-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid rgba(0,0,0,0.03)}
-.tiny{padding:6px 10px;border-radius:8px;border:none;cursor:pointer}
-.btn-red{background:#ff6b6b;color:#fff}
-
-/* small UI niceties */
-.pay-grid{display:flex;gap:12px}
-.pay-grid > div{flex:1;padding:12px;border-radius:10px;background:#fbfbfb;text-align:center}
-
-/* responsive */
-@media (max-width: 1000px){
-  .dash-content{flex-direction:column}
-  .dash-right{width:100%}
-  .search input{width:200px}
-  .sidebar{display:none}
-}
+/* ==========================================
+   TOP FARMER CARD
+========================================== */
 .farmer-top-box {
   background: #ffffff;
-  padding: 18px;
-  margin: 0 22px;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
   margin-bottom: 20px;
+  border-left: 6px solid #2f8f2f;
 }
 
 .farmer-welcome {
   margin: 0;
   font-size: 24px;
-  color: var(--green);
-  font-weight: 800;
+  font-weight: bold;
+  color: #1b5f1b;
 }
 
 .farmer-info {
-  margin: 4px 0;
-  font-size: 14px;
-  color: var(--muted);
-}
-.sell-btn {
-  background: #2e7d32;
-  color: white;
-  padding: 12px 18px;
+  margin: 3px 0;
   font-size: 15px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  margin: 10px 20px;
-  font-weight: 600;
+  color: #2d3c2d;
 }
+
+/* ==========================================
+   SELL BUTTON
+========================================== */
+.sell-btn {
+  background: #2f8f2f;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.2s;
+  width: 100%;
+}
+
 .sell-btn:hover {
-  background: #1b5e20;
+  background: #236f23;
+}
+
+/* ==========================================
+   DASHBOARD GRID (LEFT / RIGHT)
+========================================== */
+.dash-content {
+  display: flex;
+  gap: 22px;
+}
+
+.dash-left,
+.dash-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dash-left {
+  flex: 2;
+}
+
+.dash-right {
+  flex: 1;
+}
+
+/* ==========================================
+   COMPONENT CARD STYLE (GLOBAL)
+========================================== */
+.component-card {
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-left: 5px solid #3fa93f;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #175917;
+  margin-bottom: 12px;
+}
+
+/* ==========================================
+   LOADING SCREEN
+========================================== */
+.loading {
+  text-align: center;
+  font-size: 26px;
+  padding-top: 80px;
+  color: #2f8f2f;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+========================================== */
+@media (max-width: 1000px) {
+  .dash-content {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-main {
+    margin-left: 0;
+    padding: 12px;
+  }
+
+  .sell-btn {
+    font-size: 16px;
+  }
+
+  .farmer-welcome {
+    font-size: 20px;
+  }
 }
