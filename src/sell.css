@@ -1,0 +1,123 @@
+/* PAGE BACKGROUND */
+.sell-page {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #eef5ef; /* soft green-grey background */
+}
+
+/* MAIN CARD */
+.sell-card {
+  width: 85%;
+  max-width: 850px;
+  background: #ffffff; /* clean white card */
+  padding: 28px 32px;
+  border-radius: 18px;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.10);
+  border: 1px solid #dce5dc;
+}
+
+/* TITLE */
+.sell-card h2 {
+  text-align: center;
+  color: #1b5e20; /* deep green */
+  margin-bottom: 28px;
+  font-size: 27px;
+  font-weight: 800;
+}
+
+/* SECTION HEADING */
+.section-title {
+  margin-top: 28px;
+  margin-bottom: 12px;
+  font-size: 20px;
+  color: #0d47a1; /* dark blue */
+  font-weight: 700;
+  padding-bottom: 6px;
+  border-left: 6px solid #2e7d32;
+  padding-left: 12px;
+}
+
+/* LABEL */
+.sell-card label {
+  font-weight: 600;
+  margin-top: 12px;
+  color: #333; /* dark readable text */
+  display: block;
+}
+
+/* INPUT + SELECT */
+.sell-card input,
+.sell-card select,
+.sell-card textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.6px solid #c7d2c6;
+  font-size: 15px;
+  color: #222;
+  background: #f7faf7; /* very soft greenish white */
+  transition: 0.25s;
+}
+
+.sell-card input:focus,
+.sell-card select:focus,
+.sell-card textarea:focus {
+  border-color: #1b5e20;
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(46, 125, 50, 0.3);
+}
+
+/* FILE INPUT */
+.sell-card input[type="file"] {
+  padding: 10px;
+  background: #f1f5f2;
+}
+
+/* SUBMIT BUTTON */
+.sell-btn {
+  width: 100%;
+  margin-top: 30px;
+  padding: 14px;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  border: none;
+  color: white;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.sell-btn:hover {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  transform: scale(1.03);
+}
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: #dce5dc;
+  margin: 18px 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .sell-card {
+    padding: 24px 16px;
+  }
+
+  .sell-card h2 {
+    font-size: 23px;
+  }
+
+  .section-title {
+    font-size: 17px;
+    padding-left: 10px;
+  }
+
+  .sell-card input,
+  .sell-card select {
+    padding: 10px;
+  }
+}

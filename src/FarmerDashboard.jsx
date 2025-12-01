@@ -59,8 +59,14 @@ export default function FarmerDashboard() {
           <p className="farmer-info">जिल्हा: {farmer.district}</p>
           <p className="farmer-info">पिके: {farmer.crops}</p>
         </div>
+        <button 
+  className="sell-btn"
+  onClick={() => navigate("/farmer/sell")}
+>
+  🌾 माझा माल विक्रीसाठी टाका
+</button>
 
-        {/* MAIN DASHBOARD SECTIONS */}
+     
         <div className="dash-content">
           <div className="dash-left">
             <ProfileOverview farmer={farmer} lang={lang} />

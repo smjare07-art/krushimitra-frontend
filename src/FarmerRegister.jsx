@@ -67,16 +67,16 @@ export default function FarmerRegister() {
   });
   const [passError, setPassError] = useState("");
 
-  const updatePassword = (f, v) => {
-    const d = { ...passwords, [f]: v };
-    setPasswords(d);
+  const updatePassword = (field, value) => {
+    const data = { ...passwords, [field]: value };
+    setPasswords(data);
 
-    if (d.pass !== d.confirm) setPassError("Passwords do not match");
+    if (data.pass !== data.confirm) setPassError("Passwords do not match");
     else setPassError("");
   };
 
   // ======================================================
-  // PHOTO UPLOAD PREVIEW
+  // PHOTO PREVIEW + REMOVE
   // ======================================================
   const [photoPreview, setPhotoPreview] = useState(null);
 
@@ -85,6 +85,12 @@ export default function FarmerRegister() {
     setForm({ ...form, photo: file });
 
     if (file) setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  // remove photo
+  const removePhoto = () => {
+    setForm({ ...form, photo: null });
+    setPhotoPreview(null);
   };
 
   // ======================================================
@@ -116,14 +122,14 @@ export default function FarmerRegister() {
   const verifyOtp = (type) => {
     if (otp[type].length === 6) {
       setOtpStatus((o) => ({ ...o, [type + "Verified"]: true }));
-      alert(type.toUpperCase() + " पडताळणी यशस्वी!");
+      alert(type.toUpperCase() + " पडताळणी पूर्ण!");
     } else {
-      alert("Wrong OTP!");
+      alert("OTP चुकीचा!");
     }
   };
 
   // ======================================================
-  // SAVE FORM
+  // SAVE FORM TO FIREBASE
   // ======================================================
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -145,25 +151,22 @@ export default function FarmerRegister() {
     try {
       let photoURL = "";
 
-      // ------------------------------
-      // UPLOAD PHOTO TO FIREBASE STORAGE
-      // ------------------------------
+      // upload photo
       if (form.photo) {
         const fileRef = ref(storage, `farmer_photos/${form.aadhar}.jpg`);
         await uploadBytes(fileRef, form.photo);
         photoURL = await getDownloadURL(fileRef);
       }
 
-      // ------------------------------
-      // SAVE DATA TO FIRESTORE
-      // ------------------------------
+      // save to firebase
       await setDoc(doc(db, "farmers", form.aadhar), {
         ...form,
-        photo: photoURL,
         password: passwords.pass,
+        photo: photoURL,
+        createdAt: new Date(),
       });
 
-      alert("नोंदणी पूर्ण!");
+      alert("नोंदणी यशस्वी!");
       navigate("/farmer/login");
     } catch (err) {
       alert("ERROR: " + err.message);
@@ -171,7 +174,7 @@ export default function FarmerRegister() {
   };
 
   // ======================================================
-  // UI SECTIONS + SCROLL
+  // TABS + SCROLL
   // ======================================================
   const tabs = [
     { label: "मूळ माहिती", id: "basic" },
@@ -186,6 +189,7 @@ export default function FarmerRegister() {
   ];
 
   const [activeTab, setActiveTab] = useState(0);
+
   const refs = {
     basic: useRef(null),
     address: useRef(null),
@@ -198,17 +202,18 @@ export default function FarmerRegister() {
     notify: useRef(null),
   };
 
-  const scrollTo = (id, i) => {
-    setActiveTab(i);
+  const scrollTo = (id, index) => {
+    setActiveTab(index);
     refs[id].current.scrollIntoView({ behavior: "smooth" });
   };
 
   // ======================================================
-  // UI
+  // UI RENDER
   // ======================================================
   return (
     <div className="fr-page">
       <div className="fr-card">
+
         <h1 className="main-title">🧑‍🌾 शेतकरी नोंदणी</h1>
 
         {/* TABS */}
@@ -227,32 +232,40 @@ export default function FarmerRegister() {
         {/* FORM */}
         <form className="fr-form" onSubmit={handleRegister}>
 
-          {/* BASIC */}
+          {/* 1️⃣ BASIC */}
           <h2 ref={refs.basic} className="section-title">1️⃣ मूळ माहिती</h2>
 
           <label>पूर्ण नाव *
-            <input className="fr-input" required onChange={(e) => update("fullName", e.target.value)} />
+            <input className="fr-input" required onChange={(e)=>update("fullName", e.target.value)} />
           </label>
 
           <label>आधार *
-            <input className="fr-input" maxLength="12" required onChange={(e) => update("aadhar", e.target.value)} />
+            <input className="fr-input" maxLength="12" required onChange={(e)=>update("aadhar", e.target.value)} />
           </label>
 
+          {/* AADHAR OTP */}
           {form.aadhar.length === 12 && !otpStatus.aadharVerified && (
-            <button type="button" className="otp-btn" onClick={() => sendOtp("aadhar")}>Send OTP</button>
+            <button type="button" className="otp-btn" onClick={() => sendOtp("aadhar")}>
+              Send OTP
+            </button>
           )}
 
           {otpStatus.aadharSent && !otpStatus.aadharVerified && (
             <>
-              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, aadhar: e.target.value })} />
-              <button type="button" className="verify-btn" onClick={() => verifyOtp("aadhar")}>Verify</button>
+              <input className="fr-input" maxLength="6" placeholder="OTP"
+                onChange={(e)=>setOtp({ ...otp, aadhar: e.target.value })}
+              />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("aadhar")}>
+                Verify
+              </button>
             </>
           )}
 
           {otpStatus.aadharVerified && <p className="verified">✔ आधार पडताळला</p>}
 
+          {/* MOBILE */}
           <label>मोबाईल *
-            <input className="fr-input" maxLength="10" required onChange={(e) => update("mobile", e.target.value)} />
+            <input className="fr-input" maxLength="10" required onChange={(e)=>update("mobile", e.target.value)} />
           </label>
 
           {form.mobile.length === 10 && !otpStatus.mobileVerified && (
@@ -261,15 +274,20 @@ export default function FarmerRegister() {
 
           {otpStatus.mobileSent && !otpStatus.mobileVerified && (
             <>
-              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, mobile: e.target.value })} />
-              <button type="button" className="verify-btn" onClick={() => verifyOtp("mobile")}>Verify</button>
+              <input maxLength="6" className="fr-input" placeholder="OTP"
+                onChange={(e)=>setOtp({...otp, mobile: e.target.value})}
+              />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("mobile")}>
+                Verify
+              </button>
             </>
           )}
 
           {otpStatus.mobileVerified && <p className="verified">✔ मोबाईल पडताळला</p>}
 
+          {/* EMAIL */}
           <label>ईमेल *
-            <input className="fr-input" type="email" required onChange={(e) => update("email", e.target.value)} />
+            <input className="fr-input" type="email" required onChange={(e)=>update("email", e.target.value)} />
           </label>
 
           {form.email.includes("@") && !otpStatus.emailVerified && (
@@ -278,29 +296,36 @@ export default function FarmerRegister() {
 
           {otpStatus.emailSent && !otpStatus.emailVerified && (
             <>
-              <input maxLength="6" className="fr-input" placeholder="OTP" onChange={(e) => setOtp({ ...otp, email: e.target.value })} />
-              <button type="button" className="verify-btn" onClick={() => verifyOtp("email")}>Verify</button>
+              <input maxLength="6" className="fr-input" placeholder="OTP"
+                onChange={(e)=>setOtp({...otp, email: e.target.value})}
+              />
+              <button type="button" className="verify-btn" onClick={() => verifyOtp("email")}>
+                Verify
+              </button>
             </>
           )}
 
           {otpStatus.emailVerified && <p className="verified">✔ ईमेल पडताळला</p>}
 
-          {/* ADDRESS */}
+          {/* 2️⃣ ADDRESS */}
           <h2 ref={refs.address} className="section-title">2️⃣ पत्ता</h2>
-          <label>राज्य<input className="fr-input" required onChange={(e) => update("state", e.target.value)} /></label>
-          <label>जिल्हा<input className="fr-input" required onChange={(e) => update("district", e.target.value)} /></label>
-          <label>तालुका<input className="fr-input" required onChange={(e) => update("taluka", e.target.value)} /></label>
-          <label>गाव<input className="fr-input" required onChange={(e) => update("village", e.target.value)} /></label>
-          <label>पिनकोड<input className="fr-input" maxLength="6" required onChange={(e) => update("pincode", e.target.value)} /></label>
-          <label>पूर्ण पत्ता<textarea className="fr-textarea" required onChange={(e) => update("fullAddress", e.target.value)}></textarea></label>
 
-          {/* FARM */}
+          <label>राज्य<input className="fr-input" required onChange={(e)=>update("state", e.target.value)} /></label>
+          <label>जिल्हा<input className="fr-input" required onChange={(e)=>update("district", e.target.value)} /></label>
+          <label>तालुका<input className="fr-input" required onChange={(e)=>update("taluka", e.target.value)} /></label>
+          <label>गाव<input className="fr-input" required onChange={(e)=>update("village", e.target.value)} /></label>
+          <label>पिनकोड<input className="fr-input" required maxLength="6" onChange={(e)=>update("pincode", e.target.value)} /></label>
+          <label>पूर्ण पत्ता<textarea className="fr-textarea" required onChange={(e)=>update("fullAddress", e.target.value)} /></label>
+
+          {/* 3️⃣ FARM */}
           <h2 ref={refs.farm} className="section-title">3️⃣ शेती</h2>
 
-          <label>जमिनीचे क्षेत्रफळ<input className="fr-input" required onChange={(e) => update("landArea", e.target.value)} /></label>
+          <label>जमिनीचे क्षेत्रफळ *
+            <input className="fr-input" required onChange={(e)=>update("landArea", e.target.value)} />
+          </label>
 
-          <label>जमिनीचा प्रकार
-            <select className="fr-input" required onChange={(e) => update("landType", e.target.value)}>
+          <label>जमिनीचा प्रकार *
+            <select className="fr-input" required onChange={(e)=>update("landType", e.target.value)}>
               <option value="">निवडा</option>
               <option>जिरायती</option>
               <option>सिंचित</option>
@@ -308,77 +333,152 @@ export default function FarmerRegister() {
             </select>
           </label>
 
-          <label>नेहमी पिके<input className="fr-input" required onChange={(e) => update("crops", e.target.value)} /></label>
-          <label>सध्याची पिके<input className="fr-input" required onChange={(e) => update("currentCrops", e.target.value)} /></label>
-          <label>भविष्यातील पिके<input className="fr-input" required onChange={(e) => update("upcomingCrops", e.target.value)} /></label>
+          <label>नेहमीची पिके *
+            <input className="fr-input" required onChange={(e)=>update("crops", e.target.value)} />
+          </label>
 
-          {/* BANK */}
-          <h2 ref={refs.bank} className="section-title">4️⃣ बँक माहिती</h2>
+          <label>सध्याची पिके *
+            <input className="fr-input" required onChange={(e)=>update("currentCrops", e.target.value)} />
+          </label>
 
-          <label>बँक खाते<input className="fr-input" required onChange={(e) => update("bankAccount", e.target.value)} /></label>
-          <label>IFSC<input className="fr-input" required onChange={(e) => update("ifsc", e.target.value)} /></label>
-          <label>बँक नाव<input className="fr-input" required onChange={(e) => update("bankName", e.target.value)} /></label>
-          <label>शाखा<input className="fr-input" required onChange={(e) => update("branch", e.target.value)} /></label>
-          <label>UPI<input className="fr-input" onChange={(e) => update("upi", e.target.value)} /></label>
+          <label>भविष्यातील पिके *
+            <input className="fr-input" required onChange={(e)=>update("upcomingCrops", e.target.value)} />
+          </label>
 
-          {/* SECURITY */}
-          <h2 ref={refs.security} className="section-title">5️⃣ सुरक्षा (Password + Photo)</h2>
+          {/* 4️⃣ BANK */}
+          <h2 ref={refs.bank} className="section-title">4️⃣ बँक</h2>
+
+          <label>बँक खाते *
+            <input className="fr-input" required onChange={(e)=>update("bankAccount", e.target.value)} />
+          </label>
+
+          <label>IFSC *
+            <input className="fr-input" required onChange={(e)=>update("ifsc", e.target.value)} />
+          </label>
+
+          <label>बँक नाव *
+            <input className="fr-input" required onChange={(e)=>update("bankName", e.target.value)} />
+          </label>
+
+          <label>शाखा *
+            <input className="fr-input" required onChange={(e)=>update("branch", e.target.value)} />
+          </label>
+
+          <label>UPI
+            <input className="fr-input" onChange={(e)=>update("upi", e.target.value)} />
+          </label>
+
+          {/* 5️⃣ SECURITY */}
+          <h2 ref={refs.security} className="section-title">5️⃣ सुरक्षा</h2>
 
           <label>पासवर्ड *
-            <input className="fr-input" type="password" required onChange={(e) => updatePassword("pass", e.target.value)} />
+            <input type="password" className="fr-input" required
+              onChange={(e)=>updatePassword("pass", e.target.value)} />
           </label>
 
           <label>पासवर्ड पुन्हा टाका *
-            <input className="fr-input" type="password" required onChange={(e) => updatePassword("confirm", e.target.value)} />
+            <input type="password" className="fr-input" required
+              onChange={(e)=>updatePassword("confirm", e.target.value)} />
           </label>
 
           {passError && <p style={{ color: "red" }}>{passError}</p>}
 
-          <h3>🖼 प्रोफाइल फोटो अपलोड करा</h3>
-          <input type="file" accept="image/*" onChange={handleImage} />
+          {/* ===== PHOTO SECTION BEAUTIFUL ===== */}
+          <h3 className="photo-title">🖼 प्रोफाइल फोटो अपलोड करा</h3>
 
-          {photoPreview && (
-            <img
-              src={photoPreview}
-              style={{
-                width: "150px",
-                marginTop: "10px",
-                borderRadius: "10px",
-                border: "2px solid #ccc"
-              }}
-            />
-          )}
+          <div className="photo-upload-box">
 
-          {/* DOCS */}
+            {/* photo preview */}
+            {photoPreview ? (
+              <img src={photoPreview} className="photo-preview" />
+            ) : (
+              <div className="photo-placeholder">📷 फोटो निवडा</div>
+            )}
+
+            <label className="upload-btn">
+              फोटो निवडा
+              <input type="file" hidden accept="image/*" onChange={handleImage} />
+            </label>
+
+            {photoPreview && (
+              <button type="button" className="remove-btn" onClick={removePhoto}>
+                ❌ काढा
+              </button>
+            )}
+
+          </div>
+
+          {/* 6️⃣ DOCS */}
           <h2 ref={refs.docs} className="section-title">6️⃣ कागदपत्रे</h2>
-          <label>PAN<input className="fr-input" required onChange={(e) => update("pan", e.target.value)} /></label>
+          <label>PAN क्रमांक *</label>
+          <input className="fr-input" required onChange={(e)=>update("pan", e.target.value)} />
 
-          {/* EXPERIENCE */}
+          {/* 7️⃣ EXPERIENCE */}
           <h2 ref={refs.exp} className="section-title">7️⃣ अनुभव</h2>
-          <label>अनुभव (वर्षे)<input className="fr-input" type="number" onChange={(e) => update("expYears", e.target.value)} /></label>
-          <label>तज्ञ पिके<input className="fr-input" onChange={(e) => update("expertise", e.target.value)} /></label>
-          <label>Organic माहिती<input className="fr-input" onChange={(e) => update("organicInfo", e.target.value)} /></label>
 
-          {/* LOGISTICS */}
+          <label>अनुभव (वर्षे)</label>
+          <input className="fr-input" type="number"
+            onChange={(e)=>update("expYears", e.target.value)} />
+
+          <label>तज्ञ पिके</label>
+          <input className="fr-input"
+            onChange={(e)=>update("expertise", e.target.value)} />
+
+          <label>Organic माहिती</label>
+          <input className="fr-input"
+            onChange={(e)=>update("organicInfo", e.target.value)} />
+
+          {/* 8️⃣ LOGISTICS */}
           <h2 ref={refs.logi} className="section-title">8️⃣ लॉजिस्टिक्स</h2>
-          <label>वाहन<select className="fr-input" onChange={(e) => update("hasVehicle", e.target.value)}>
+
+          <label>वाहन उपलब्ध?</label>
+          <select className="fr-input" onChange={(e)=>update("hasVehicle", e.target.value)}>
             <option>निवडा</option>
             <option>होय</option>
             <option>नाही</option>
-          </select></label>
+          </select>
 
-          {/* NOTIFICATIONS */}
+          <label>स्वतः डिलिव्हरी?</label>
+          <select className="fr-input" onChange={(e)=>update("canDeliver", e.target.value)}>
+            <option>निवडा</option>
+            <option>होय</option>
+            <option>नाही</option>
+          </select>
+
+          <label>Transport लागेल?</label>
+          <select className="fr-input" onChange={(e)=>update("needTransport", e.target.value)}>
+            <option>निवडा</option>
+            <option>होय</option>
+            <option>नाही</option>
+          </select>
+
+          {/* 9️⃣ NOTIFICATIONS */}
           <h2 ref={refs.notify} className="section-title">9️⃣ सूचना</h2>
 
-          <label className="checkbox"><input type="checkbox" onChange={(e) => update("sms", e.target.checked)} /> SMS</label>
-          <label className="checkbox"><input type="checkbox" onChange={(e) => update("price", e.target.checked)} /> बाजारभाव</label>
-          <label className="checkbox"><input type="checkbox" onChange={(e) => update("weather", e.target.checked)} /> हवामान</label>
-          <label className="checkbox"><input type="checkbox" onChange={(e) => update("offers", e.target.checked)} /> ऑफर</label>
+          <label className="checkbox">
+            <input type="checkbox" onChange={(e)=>update("sms", e.target.checked)} />
+            SMS अलर्ट
+          </label>
 
-          <br /><br />
-          <button className="btn-save" type="submit">Save</button>
+          <label className="checkbox">
+            <input type="checkbox" onChange={(e)=>update("price", e.target.checked)} />
+            बाजारभाव अलर्ट
+          </label>
+
+          <label className="checkbox">
+            <input type="checkbox" onChange={(e)=>update("weather", e.target.checked)} />
+            हवामान अलर्ट
+          </label>
+
+          <label className="checkbox">
+            <input type="checkbox" onChange={(e)=>update("offers", e.target.checked)} />
+            कंपनी ऑफर्स
+          </label>
+
+          <button type="submit" className="btn-save">Save</button>
 
         </form>
+
       </div>
     </div>
   );
