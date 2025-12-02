@@ -1,0 +1,35 @@
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #0d1b0e;
+  color: white;
+  padding: 25px 15px;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.sidebar-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-item {
+  font-size: 18px;
+  padding: 10px 14px;
+  background: #111;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sidebar-item:hover {
+  background: #1d331f;
+}

@@ -1,5 +1,5 @@
 import React from "react";
-
+import "./sidebar.css";
 export default function Sidebar({ lang }) {
   // simple label function
   const t = (mr, hi, en) => (lang === "mr" ? mr : lang === "hi" ? hi : en);

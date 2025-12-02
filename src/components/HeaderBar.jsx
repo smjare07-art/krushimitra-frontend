@@ -1,29 +1,73 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import "./HeaderBar.css";
 
 export default function HeaderBar({ lang, setLang }) {
-  const t = (mr, hi, en) => (lang === "mr" ? mr : lang === "hi" ? hi : en);
+  const [temp, setTemp] = useState(null);
+
+  // ============================
+  // FETCH LIVE TEMPERATURE
+  // ============================
+  const getWeather = () => {
+    const API_KEY = "YOUR_API_KEY"; // OpenWeather Key टाक
+
+    // Default Maharashtra center location  
+    const latitude = 19.7515;
+    const longitude = 75.7139;
+
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setTemp(data.main.temp);
+      })
+      .catch((err) => console.log("Weather Fetch Error:", err));
+  };
+
+  useEffect(() => {
+    getWeather();
+  }, []);
+
+  // GET TODAY'S DAY
+  const today = new Date().toLocaleDateString("mr-IN", {
+    weekday: "long",
+  });
 
   return (
-    <header className="headerbar">
-      <div className="search">
-        <input placeholder={t("शोधा पिक इथे...","फसल खोजें...","Search crop here...")} />
+    <div className="header-bar">
+
+      {/* SEARCH BAR */}
+      <input
+        type="text"
+        className="search-box"
+        placeholder="🔍 पिके शोधा..."
+      />
+
+      {/* TEMPERATURE */}
+      <div className="temp-box">
+        {temp !== null ? `${temp}°C` : "⏳"}
       </div>
 
-      <div className="header-right">
-        <div className="weather">24°C • {t("आज हवेची माहिती","आज मौसम","Today")}</div>
-
-        <select
-          value={lang}
-          onChange={(e) => setLang(e.target.value)}
-          className="lang-select"
-        >
-          <option value="mr">मराठी</option>
-          <option value="hi">हिंदी</option>
-          <option value="en">English</option>
-        </select>
-
-        <div className="avatar">👨</div>
+      {/* TODAY DAY */}
+      <div className="day-box">
+        आज: {today}
       </div>
-    </header>
+
+      {/* REFRESH WEATHER */}
+      <button className="refresh-btn" onClick={getWeather}>
+        🔄
+      </button>
+
+      {/* LANGUAGE SELECTOR */}
+      <select
+        className="lang-select"
+        value={lang}
+        onChange={(e) => setLang(e.target.value)}
+      >
+        <option value="mr">मराठी</option>
+        <option value="hi">हिंदी</option>
+        <option value="en">English</option>
+      </select>
+    </div>
   );
 }
