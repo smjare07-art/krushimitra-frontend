@@ -1,0 +1,90 @@
+.profile-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #dfe7df;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* TOP SECTION */
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.profile-photo {
+  width: 70px;
+  height: 70px;
+  background: #eaf6e8;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 35px;
+  border: 2px solid #cfe6cf;
+}
+
+.profile-photo img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.profile-basic {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2e7d32;
+}
+
+.profile-location {
+  font-size: 15px;
+  color: #5f5f5f;
+}
+
+/* GRID INFO */
+.profile-grid {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.profile-item {
+  flex: 1;
+  min-width: 130px;
+  background: #f7faf7;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #e0ece0;
+}
+
+.profile-item strong {
+  font-size: 14px;
+  color: #1565c0;
+}
+
+.profile-item span {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+/* STATUS COLORS */
+.status-ok {
+  color: #1b5e20;
+  font-weight: 700;
+}
+
+.status-pending {
+  color: #d32f2f;
+  font-weight: 700;
+}
