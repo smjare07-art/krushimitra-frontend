@@ -1,120 +1,131 @@
-/* Root */
+/* ROOT */
 .dash-root {
   display: flex;
   min-height: 100vh;
-  background: #f1f6f1; /* soft green */
+  background: #eef5ef;
   font-family: "Poppins", sans-serif;
+  color: #1b1b1b;            /* GLOBAL TEXT COLOR */
 }
 
-/* Main Layout */
+/* MAIN AREA */
 .dash-main {
-  margin-left: 240px; 
-  padding: 20px;
-  width: calc(100% - 240px);
+  margin-left: 250px;
+  padding: 25px;
+  width: calc(100% - 250px);
+  color: #1f1f1f;            /* Main text */
 }
 
-/* Top Farmer Box */
-.farmer-top-box {
-  background: white;
+/* FARMER INFO CARD */
+.farmer-info-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
   border-left: 8px solid #2e7d32;
-  padding: 22px;
-  border-radius: 14px;
-  color: #1a1a1a;
-  margin-bottom: 20px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+  color: #1f1f1f;            /* Main text color */
 }
 
-.farmer-welcome {
-  font-size: 26px;
+/* HEADER */
+.info-header h2 {
+  margin: 0;
+  color: #12491c;            /* Deep green heading */
   font-weight: 800;
-  color: #2e7d32;
-  margin-bottom: 6px;
 }
 
-.farmer-info {
-  font-size: 16px;
-  color: #4c4c4c;
+/* EDIT BUTTON */
+.edit-btn {
+  background: #1565c0;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
 }
 
-/* SELL BUTTON */
-.sell-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+.edit-btn:hover {
+  background: #0d47a1;
+}
+
+/* VIEW GRID */
+.info-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap: 15px;
+}
+
+.info-grid div {
+  background: #f8fbf8;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d5e0d5;
+  color: #1d1d1d;            /* Grid text visible */
+}
+
+.info-grid strong {
+  color: #1565c0;            /* Blue label */
+  font-weight: 700;
+}
+
+/* EDIT GRID */
+.edit-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+  gap: 18px;
+}
+
+.edit-grid label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #12491c;            /* Dark green label */
+}
+
+.edit-grid input,
+.edit-grid textarea {
+  margin-top: 6px;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1.7px solid #cfd8dc;
+  background: #f7faf7;
+  font-size: 15px;
+  color: #1a1a1a;            /* Input text dark */
+}
+
+.edit-grid input:focus,
+.edit-grid textarea:focus {
+  border-color: #2e7d32;
+  background: #ffffff;
+}
+
+/* UPDATE BUTTON */
+.update-btn {
+  grid-column: span 2;
+  background: #2e7d32;
+  padding: 12px;
   color: white;
   border: none;
-  padding: 14px 18px;
-  border-radius: 12px;
-  font-size: 18px;
+  border-radius: 10px;
+  font-size: 17px;
   font-weight: 700;
-  margin-bottom: 20px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: 0.25s;
 }
 
-.sell-btn:hover {
-  transform: scale(1.02);
-  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+.update-btn:hover {
+  background: #1b5e20;
 }
 
-/* Content Columns */
-.dash-content {
-  display: flex;
-  gap: 20px;
-}
-
-.dash-left {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.dash-right {
-  flex: 1.3;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* General Card Style */
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  border: 1px solid #d7e3d7;
-}
-
-/* Card Title */
-.card-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1565c0; /* blue */
-  margin-bottom: 10px;
-}
-
-/* Card Text */
-.card-text {
-  font-size: 15px;
-  color: #4c4c4c;
-}
-
-/* Loading */
+/* LOADING TEXT */
 .loading {
   text-align: center;
   padding: 50px;
   font-size: 22px;
-  color: #2e7d32;
+  color: #2e7d32;            /* visible green */
 }
 
-/* Responsive */
-@media (max-width: 950px) {
-  .dash-content {
-    flex-direction: column;
-  }
-}
-
+/* RESPONSIVE */
 @media (max-width: 600px) {
   .dash-main {
     margin-left: 0;

@@ -2,51 +2,62 @@ import React from "react";
 import "./ProfileOverview.css";
 
 export default function ProfileOverview({ farmer, lang }) {
+  
+  // LANGUAGE HANDLER
   const t = (mr, hi, en) =>
     lang === "mr" ? mr : lang === "hi" ? hi : en;
 
-  // जर डेटा नसेल तर
+  // जर farmer डेटा उपलब्ध नसेल तर काहीही दाखवू नका
   if (!farmer) return null;
 
   return (
-    <section className="profile-card">
-
+    <section className="card profile">
+      
       {/* TOP SECTION */}
       <div className="profile-top">
-        <div className="profile-photo">
+        
+        {/* PHOTO IF EXISTS */}
+        <div className="pf-photo">
           {farmer.photo ? (
-            <img src={farmer.photo} alt="Farmer" />
+            <img src={farmer.photo} alt="farmer" />
           ) : (
             "👨‍🌾"
           )}
         </div>
 
-        <div className="profile-basic">
-          <h3 className="profile-name">{farmer.fullName}</h3>
-          <p className="profile-location">
+        <div>
+          <h3>{farmer.fullName}</h3>
+          <div className="muted">
             {farmer.village} • {farmer.district}
-          </p>
+          </div>
         </div>
       </div>
 
-      {/* GRID INFO */}
+      {/* GRID INFORMATION */}
       <div className="profile-grid">
 
-        <div className="profile-item">
-          <strong>{t("शेती क्षेत्रफळ", "खेत क्षेत्र", "Land Area")}</strong>
-          <span>{farmer.landArea || "N/A"}</span>
+        {/* Land Area */}
+        <div>
+          <strong>{t("शेती क्षेत्रफळ","खेत क्षेत्र","Land Area")}</strong>
+          <div>{farmer.landArea || "माहिती उपलब्ध नाही"}</div>
         </div>
 
-        <div className="profile-item">
-          <strong>{t("पिके", "फसलें", "Crops")}</strong>
-          <span>{farmer.crops || "N/A"}</span>
+        {/* Crops */}
+        <div>
+          <strong>{t("पिके","फसलें","Crops")}</strong>
+          <div>{farmer.crops || "माहिती उपलब्ध नाही"}</div>
         </div>
 
-        <div className="profile-item">
-          <strong>{t("KYC स्थिती", "KYC स्थिति", "KYC Status")}</strong>
-          <span className={farmer.kyc === "Verified" ? "status-ok" : "status-pending"}>
+        {/* KYC Status */}
+        <div>
+          <strong>{t("KYC स्थिती","KYC स्थिति","KYC Status")}</strong>
+          <div
+            className={`status ${
+              farmer.kyc === "Verified" ? "ok" : "pending"
+            }`}
+          >
             {farmer.kyc || "Pending"}
-          </span>
+          </div>
         </div>
 
       </div>

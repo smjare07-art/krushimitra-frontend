@@ -1,29 +1,31 @@
 import React from "react";
-import "./sidebar.css";
-export default function Sidebar({ lang }) {
-  // simple label function
-  const t = (mr, hi, en) => (lang === "mr" ? mr : lang === "hi" ? hi : en);
+import "./Sidebar.css";
+import { useNavigate } from "react-router-dom";
+
+export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const menu = [
+    { name: "डॅशबोर्ड", path: "/farmer/dashboard" },
+    { name: "वैयक्तिक माहिती", path: "/farmer/dashboard" },
+    { name: "माझी पिके", path: "/farmer/crops" },
+    { name: "बाजारभाव", path: "/farmer/market" },
+    { name: "ऑफर्स", path: "/farmer/offers" },
+    { name: "पेमेंट", path: "/farmer/payments" },
+    { name: "सेटिंग्ज", path: "/farmer/settings" }
+  ];
 
   return (
-    <aside className="sidebar">
-      <div className="brand">
-        <div className="logo">🌾</div>
-        <div className="brand-text">Krushimitra</div>
+    <div className="sidebar">
+      <div className="sidebar-logo">🌾 Krushimitra</div>
+      <div className="sidebar-menu">
+        {menu.map((item, i) => (
+          <button key={i} onClick={() => navigate(item.path)} className="sidebar-item">
+            {item.name}
+          </button>
+        ))}
       </div>
-
-      <nav className="menu">
-        <button className="menu-item">{t("डॅशबोर्ड","डैशबोर्ड","Dashboard")}</button>
-        <button className="menu-item">{t("माझी पिके","मेरी फसलें","My Crops")}</button>
-        <button className="menu-item">{t("बाजारभाव","बाजार भाव","Market Price")}</button>
-        <button className="menu-item">{t("ऑफर्स","ऑफर्स","Offers")}</button>
-        <button className="menu-item">{t("ऑर्डर्स","ऑर्डर्स","Orders")}</button>
-        <button className="menu-item">{t("पेमेंटन","पेमेंट","Payments")}</button>
-        <button className="menu-item">{t("सेटिंग्ज","सेटिंग्स","Settings")}</button>
-      </nav>
-
-      <div className="sidebar-footer">
-        <small>© Krushimitra</small>
-      </div>
-    </aside>
+      <p className="sidebar-footer">© Krushimitra</p>
+    </div>
   );
 }
